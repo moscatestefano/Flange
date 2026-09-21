@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Preliy.Flange
 {
@@ -6,7 +6,7 @@ namespace Preliy.Flange
     /// Frame configuration using the Denavit-Hartenberg parameters
     /// </summary>
     [System.Serializable]
-    public record FrameConfig
+    public class FrameConfig
     {
         public string Name
         {
@@ -51,6 +51,11 @@ namespace Preliy.Flange
             _theta = theta;
         }
 
-        public static FrameConfig Default => new (0, 0, 0, 0);
+        public static FrameConfig Default => new FrameConfig(0, 0, 0, 0);
+
+        public FrameConfig Clone()
+        {
+            return new FrameConfig(_alpha, _a, _d, _theta, _name);
+        }
     }
 }

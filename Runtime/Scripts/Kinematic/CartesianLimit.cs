@@ -1,9 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Preliy.Flange
 {
     [System.Serializable]
-    public record CartesianLimit
+    public class CartesianLimit
     {
         public float LinearSpeed
         {
@@ -37,5 +37,10 @@ namespace Preliy.Flange
 
         public static CartesianLimit Default => new CartesianLimit(3, 10, 180, 900);
         public static CartesianLimit Null => new CartesianLimit(0, 0, 0, 0);
+
+        public CartesianLimit Clone()
+        {
+            return new CartesianLimit(_linearSpeed, _linearAcc, _rotationSpeed, _rotationAcc);
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Preliy.Flange.Common
@@ -12,7 +12,7 @@ namespace Preliy.Flange.Common
         [SerializeField]
         private bool _gripped;
         [SerializeField]
-        private List<Part> _parts = new ();
+        private List<Part> _parts = new List<Part>();
 
         public void Grip(bool grip)
         {

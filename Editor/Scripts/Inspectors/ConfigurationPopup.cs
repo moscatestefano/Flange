@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace Preliy.Flange.Editor
 {
@@ -10,47 +9,44 @@ namespace Preliy.Flange.Editor
     {
         private readonly Controller _controller;
         private readonly List<IKSolution> _solutions;
-        private readonly RadioButtonGroup _radioButtonGroup;
-        
+        private string[] _labels;
+
         public ConfigurationPopup(Controller controller, bool turn)
         {
             _controller = controller;
             var robotTarget = new CartesianTarget(_controller.GetTcpRelativeToRefFrame(), _controller.Configuration.Value, _controller.MechanicalGroup.JointState.ExtJoint);
             _solutions = controller.Solver.GetAllSolutions(robotTarget, _controller.Tool.Value, _controller.Frame.Value, turn);
-            _radioButtonGroup = new RadioButtonGroup("", _solutions.Select(solution => solution.GetLabel()).ToList());
+            _labels = _solutions.Select(solution => solution.GetLabel()).ToArray();
         }
-        
+
         public override Vector2 GetWindowSize()
         {
-            return new Vector2(480, _solutions.Count * 20f);
+            return new Vector2(480, Mathf.Max(50f, _solutions.Count * (EditorGUIUtility.singleLineHeight + 4f) + 10f));
         }
 
         public override void OnGUI(Rect rect)
         {
-            
-        }
+            if (_controller == null)
+            {
+                EditorGUILayout.LabelField("Controller is unavailable.");
+                return;
+            }
 
-        public override void OnOpen()
-        {
-            if (_controller == null) return;
-            
-            _radioButtonGroup.RegisterValueChangedCallback(ConfigurationChangedCallback);
-            var actualSolution = _solutions.Find(item => item.Configuration == _controller.Configuration.Value);
-            if (actualSolution is not null) _radioButtonGroup.SetValueWithoutNotify(_solutions.IndexOf(actualSolution));
+            if (_solutions.Count == 0)
+            {
+                EditorGUILayout.HelpBox("No inverse-kinematic configuration is available for the current target.", MessageType.Info);
+                return;
+            }
 
-            var scrollView = new ScrollView();
-            scrollView.Add(_radioButtonGroup);
-            editorWindow.rootVisualElement.Add(scrollView);
-        }
-        
-        public override void OnClose()
-        {
-            _radioButtonGroup.UnregisterValueChangedCallback(ConfigurationChangedCallback);
-        }
+            var currentIndex = _solutions.FindIndex(item => item.Configuration == _controller.Configuration.Value);
+            if (currentIndex < 0) currentIndex = 0;
 
-        private void ConfigurationChangedCallback(ChangeEvent<int> evt)
-        {
-            _controller.Solver.TryApplySolution(_solutions[evt.newValue]);
+            EditorGUI.BeginChangeCheck();
+            var selectedIndex = EditorGUILayout.Popup("Configuration", currentIndex, _labels);
+            if (EditorGUI.EndChangeCheck() && selectedIndex >= 0 && selectedIndex < _solutions.Count)
+            {
+                _controller.Solver.TryApplySolution(_solutions[selectedIndex]);
+            }
         }
     }
 }

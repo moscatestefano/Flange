@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+#if UNITY_2021_2_OR_NEWER
+using UnityEditor;
 using UnityEditor.Overlays;
 using UnityEditor.Search;
 using UnityEngine.UIElements;
@@ -54,3 +55,5 @@ namespace Preliy.Flange.Editor
         }
     }
 }
+
+#endif

@@ -2,7 +2,8 @@
 
 # Overview
 ## What is Flange?
-**Flange** is a Unity package for industrial robots simulation.
+**Flange** is a Unity package made by Prelyi for industrial robots simulation.
+The current fork adds the IK solver for the **LBR iiwa 14 R820 CR** model and all the necessary integrations to work with the original framework.
 
 ## Key Features:
 + Kinematic Solver: Analytical forward and inverse kinematic solvers for different robot types
@@ -17,21 +18,19 @@ You can install the Flange package in Unity using one of the following methods:
 ### A. Install via Git URL (Recommended):
 1. Open Unity > Package Manager
 2. Click + → "Add package from git URL..."
-3. Enter: `https://github.com/Preliy/Flange.git#upm`
+3. Enter: `https://github.com/moscatestefano/Flange.git#upm`
 4. Click Add and wait for installation.
    
 ### B. Install via git URL by adding this entry in the project's manifest.json:
    ```json
-   "com.preliy.flange": "https://github.com/Preliy/Flange.git#upm"
+   "com.moscatestefano.flange": "https://github.com/moscatestefano/Flange.git#upm"
    ```
-# Contribution
-Contributions are welcome! Developers can participate by reporting issues, suggesting features, or submitting pull requests. For support, refer to the documentation or join discussions in the project repository.
+# Unity 2019.4 compatibility
 
-# Custom Support
-For custom support or project-specific inquiries, contact us at `preliyex@gmail.com`.
+This archive is a compatibility backport of Flange 1.0.11 for Unity 2019.4. The runtime and editor sources have been converted to syntax supported by the C# 7.3 compiler used by Unity 2019.4. The newer SceneView Overlay implementation is conditionally disabled on older Unity versions, and the configuration popup uses an IMGUI fallback instead of the newer RadioButtonGroup API.
 
 # Sponsoring & Donations
-If you find Flange useful, consider supporting the project to help maintain development and improve features:
+If you find Flange useful, consider supporting the project of the original author to help maintain development and improve features:
 + [GitHub Sponsors](https://github.com/sponsors/Preliy)
 + [Buy Me a Coffee](buymeacoffee.com/preliy)
 
@@ -132,3 +131,8 @@ For kinematic configuration, `Controller.cs` includes three main fields:
 
 > [!NOTE]  
 > The latest asset version was uploaded and the demo scenes were built from Unity 2022.3.0f1 The advertised features relate to the latest version and might not be present in the earlier versions. Please check the documentation changelog.
+
+
+### KUKA LBR iiwa 14 R820
+
+This package now includes `Robot7RLBRIIWA`, a 7-axis kinematic model based on the supplied LBR iiwa 14 R820 URDF. The inverse kinematics uses a damped-least-squares Jacobian solver and keeps the result close to the current joint state. The robot limits follow the supplied KUKA specification: A1/A3/A5 ±170°, A2/A4/A6 ±120°, A7 ±175°.

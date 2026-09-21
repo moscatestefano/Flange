@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace Preliy.Flange
@@ -13,13 +13,13 @@ namespace Preliy.Flange
         
         private readonly Controller _controller;
         [SerializeField]
-        private Property<Matrix4x4> _flange = new(); 
+        private Property<Matrix4x4> _flange = new Property<Matrix4x4>(); 
         [SerializeField]
-        private Property<Matrix4x4> _toolCenterPointBase = new();
+        private Property<Matrix4x4> _toolCenterPointBase = new Property<Matrix4x4>();
         [SerializeField]
-        private Property<Matrix4x4> _toolCenterPointWorld = new();
+        private Property<Matrix4x4> _toolCenterPointWorld = new Property<Matrix4x4>();
         [SerializeField]
-        private Property<Matrix4x4> _toolCenterPointFrame = new();
+        private Property<Matrix4x4> _toolCenterPointFrame = new Property<Matrix4x4>();
 
         public event Action OnPoseChanged;
         

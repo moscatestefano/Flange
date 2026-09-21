@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -22,7 +22,7 @@ namespace Preliy.Flange
 
         public JointTarget JointValue
         {
-            get => new (_joints.GetJointValues());
+            get => new JointTarget(_joints.GetJointValues());
             set
             {
                 _joints.SetJointValues(value);
@@ -44,9 +44,9 @@ namespace Preliy.Flange
 
         [Header("References")]
         [SerializeField]
-        protected List<Frame> _frames = new ();
+        protected List<Frame> _frames = new List<Frame>();
         [SerializeField]
-        protected List<TransformJoint> _joints = new ();
+        protected List<TransformJoint> _joints = new List<TransformJoint>();
 
         [Header("Gizmos")]
         [SerializeField]
@@ -61,7 +61,7 @@ namespace Preliy.Flange
         private Matrix4x4 _worldTransform;
 
         private bool _isJointStateChanged;
-        private List<TransformJoint> _lastJoints = new ();
+        private List<TransformJoint> _lastJoints = new List<TransformJoint>();
 
         private void OnEnable()
         {
@@ -98,12 +98,12 @@ namespace Preliy.Flange
 
             foreach (var frame in _frames)
             {
-                frame.Config = frame.Config with { };
+                frame.Config = frame.Config == null ? null : frame.Config.Clone();
             }
             
             foreach (var joint in _joints)
             {
-                joint.Config = joint.Config with { };
+                joint.Config = joint.Config == null ? null : joint.Config.Clone();
             }
         }
         

@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace Preliy.Flange
 {
     [Serializable]
-    public record IKSolution
+    public class IKSolution
     {
         public JointTarget JointTarget => _jointTarget;
         public IKSolutionState State => _state;
@@ -25,7 +25,7 @@ namespace Preliy.Flange
 
         private NotValidIKSolutionException _exception;
 
-        public static IKSolution IKSolutionNaN => new ("Target in not reachable!");
+        public static IKSolution IKSolutionNaN => new IKSolution("Target in not reachable!");
 
         /// <summary>
         /// Inverse kinematic solution
@@ -35,7 +35,7 @@ namespace Preliy.Flange
         public IKSolution(JointTarget target, Configuration configuration)
         {
             _state = IKSolutionState.Unknown;
-            _jointTarget = target with {};
+            _jointTarget = target == null ? null : target.Clone();
             SetConfiguration(configuration);
         }
 

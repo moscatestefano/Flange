@@ -40,12 +40,14 @@ namespace Preliy.Flange
         
         public static void SetMatrix(this Transform transform, Matrix4x4 matrix)
         {
-            transform.SetPositionAndRotation(matrix.GetPosition(),matrix.rotation);
+            transform.position = matrix.GetPosition();
+            transform.rotation = matrix.rotation;
         }
 
         public static void SetLocalMatrix(this Transform transform, Matrix4x4 matrix)
         {
-            transform.SetLocalPositionAndRotation(matrix.GetPosition(),matrix.rotation);
+            transform.localPosition = matrix.GetPosition();
+            transform.localRotation = matrix.rotation;
         }
 
         public static Matrix4x4 GetMatrix(this Transform transform)
@@ -164,12 +166,9 @@ namespace Preliy.Flange
         public static float ClampPI(float value)
         {
             value %= 2 * Mathf.PI;
-            return value switch
-            {
-                > Mathf.PI => value - 2 * Mathf.PI,
-                < -Mathf.PI => value + 2 * Mathf.PI,
-                _ => value
-            };
+            if (value > Mathf.PI) return value - 2 * Mathf.PI;
+            if (value < -Mathf.PI) return value + 2 * Mathf.PI;
+            return value;
         }
 
         public static float Get3PointSplineLength(Vector3 p0, Vector3 p1, Vector3 waypoint, int iterationsCount = 64)

@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace Preliy.Flange
 {
     [Serializable]
-    public record ExtJoint
+    public class ExtJoint
     {
         public const int LENGTH = 6;
 
@@ -46,16 +46,16 @@ namespace Preliy.Flange
         {
             get
             {
-                return index switch
+                switch (index)
                 {
-                    0 => _e1,
-                    1 => _e2,
-                    2 => _e3,
-                    3 => _e4,
-                    4 => _e5,
-                    5 => _e6,
-                    _ => throw new IndexOutOfRangeException("Invalid index!")
-                };
+                    case 0: return _e1;
+                    case 1: return _e2;
+                    case 2: return _e3;
+                    case 3: return _e4;
+                    case 4: return _e5;
+                    case 5: return _e6;
+                    default: throw new IndexOutOfRangeException("Invalid index!");
+                }
             }
             set
             {
@@ -87,7 +87,7 @@ namespace Preliy.Flange
         
         public ExtJoint(params float[] value)
         {
-            if (value is null) throw new ArgumentNullException(nameof(value));
+            if (value == null) throw new ArgumentNullException(nameof(value));
             if (value.Length > LENGTH) throw new ArgumentOutOfRangeException();
 
             _e1 = Math.FLOAT_MAX;
@@ -104,8 +104,13 @@ namespace Preliy.Flange
         }
         
         public static ExtJoint Default => 
-            new (Math.FLOAT_MAX, Math.FLOAT_MAX, Math.FLOAT_MAX, Math.FLOAT_MAX, Math.FLOAT_MAX, Math.FLOAT_MAX);
+            new ExtJoint(Math.FLOAT_MAX, Math.FLOAT_MAX, Math.FLOAT_MAX, Math.FLOAT_MAX, Math.FLOAT_MAX, Math.FLOAT_MAX);
         
+        public ExtJoint Clone()
+        {
+            return new ExtJoint(Value);
+        }
+
         public override string ToString()
         {
             return string.Join(", ", Value);

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace Preliy.Flange
@@ -18,7 +18,7 @@ namespace Preliy.Flange
         [SerializeField]
         private Color _lineColor;
 
-        public static GizmosConfig Default => new (1, Color.red, Color.white);
+        public static GizmosConfig Default => new GizmosConfig(1, Color.red, Color.white);
 
         public GizmosConfig(float scale, Color pointColor, Color lineColor)
         {

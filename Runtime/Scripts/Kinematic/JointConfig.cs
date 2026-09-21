@@ -1,9 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace Preliy.Flange
 {
     [System.Serializable]
-    public record JointConfig
+    public class JointConfig
     {
         public string Name
         {
@@ -69,6 +69,11 @@ namespace Preliy.Flange
             return (value + _offset) * _factor;
         }
         
-        public static JointConfig Default => new (TransformJoint.JointType.Rotation, new Vector2(-180, 180), 0, 1f, 100f,500f);
+        public static JointConfig Default => new JointConfig(TransformJoint.JointType.Rotation, new Vector2(-180, 180), 0, 1f, 100f, 500f);
+
+        public JointConfig Clone()
+        {
+            return new JointConfig(_type, _limits, _offset, _factor, _speedMax, _accMax, _name);
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace Preliy.Flange
@@ -48,7 +48,7 @@ namespace Preliy.Flange
         [SerializeField]
         private int _index;
 
-        public static Configuration Default => new (0, 0, 0, 0);
+        public static Configuration Default => new Configuration(0, 0, 0, 0);
 
         public Configuration(int turn1, int turn4, int turn6, int index)
         {
@@ -98,7 +98,15 @@ namespace Preliy.Flange
         
         public override int GetHashCode()
         {
-            return HashCode.Combine(_turn1, _turn4, _turn6, _index);
+            unchecked
+            {
+                var hash = 17;
+                hash = hash * 31 + _turn1;
+                hash = hash * 31 + _turn4;
+                hash = hash * 31 + _turn6;
+                hash = hash * 31 + _index;
+                return hash;
+            }
         }
     }
 }

@@ -12,7 +12,14 @@ namespace Preliy.Flange
     {
         public IProperty<float> Position => _position;
         
-        public Frame Frame => _frame ??= GetComponent<Frame>();
+        public Frame Frame
+        {
+            get
+            {
+                if (_frame == null) _frame = GetComponent<Frame>();
+                return _frame;
+            }
+        }
 
         public JointConfig Config
         {
@@ -20,11 +27,22 @@ namespace Preliy.Flange
             set => _config = value;
         }
 
+        public bool UseCustomAxis => _useCustomAxis;
+        public Vector3 CustomAxis => _customAxis;
+        public Vector3 CustomOriginOffset => _customOriginOffset;
+
         [SerializeField]
-        private Property<float> _position = new();
+        private Property<float> _position = new Property<float>();
 
         [SerializeField]
         private JointConfig _config = JointConfig.Default;
+
+        [SerializeField]
+        private bool _useCustomAxis;
+        [SerializeField]
+        private Vector3 _customAxis = Vector3.up;
+        [SerializeField]
+        private Vector3 _customOriginOffset;
 
         private Frame _frame;
 
@@ -45,11 +63,36 @@ namespace Preliy.Flange
 
         private void SetValue(float value)
         {
-            transform.SetLocalMatrix(HomogeneousMatrix.Create(Frame.Config, Config, value));
+            if (_useCustomAxis)
+            {
+                var frameMatrix = HomogeneousMatrix.CreateRaw(Frame.Config);
+                var origin = Matrix4x4.Translate(_customOriginOffset);
+                var angleDegrees = Config.GetValidValue(value);
+                var axis = _customAxis.sqrMagnitude > 1e-8f ? _customAxis.normalized : Vector3.up;
+                var rotation = Matrix4x4.Rotate(Quaternion.AngleAxis(angleDegrees, axis));
+                transform.SetLocalMatrix(frameMatrix * origin * rotation);
+            }
+            else
+            {
+                transform.SetLocalMatrix(HomogeneousMatrix.Create(Frame.Config, Config, value));
+            }
             
 #if UNITY_EDITOR
             if (!Application.isPlaying) UnityEditor.EditorUtility.SetDirty(this);
 #endif
+        }
+
+        public void ConfigureCustomAxis(Vector3 axis, bool enabled = true)
+        {
+            ConfigureCustomAxis(axis, Vector3.zero, enabled);
+        }
+
+        public void ConfigureCustomAxis(Vector3 axis, Vector3 originOffset, bool enabled = true)
+        {
+            _customAxis = axis.sqrMagnitude > 1e-8f ? axis.normalized : Vector3.up;
+            _customOriginOffset = originOffset;
+            _useCustomAxis = enabled;
+            SetValue(_position.Value);
         }
 
         public enum JointType
@@ -68,7 +111,8 @@ namespace Preliy.Flange
         
         public int GetHashCode(TransformJoint obj)
         {
-            return HashCode.Combine(obj._position, obj._config, obj._frame);
+            if (ReferenceEquals(obj, null)) return 0;
+            return obj.name == null ? 0 : obj.name.GetHashCode();
         }
     }
 }

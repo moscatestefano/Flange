@@ -1,3 +1,22 @@
+## [1.0.11] - Unity 2019.4 compatibility / LBR iiwa support
+
+- Added `Robot7RLBRIIWA` for the KUKA LBR iiwa 14 R820 using the supplied URDF geometry and joint limits.
+- Extended `RobJoint` to 7 robot axes and `JointTarget` to 7 robot axes plus 6 external axes.
+- Added optional arbitrary-axis support to `TransformJoint` while preserving legacy behavior.
+- Added numerical damped-least-squares IK for the 7R LBR with joint-limit enforcement and current-pose seeding.
+- Replaced remaining Unity APIs in touched code that are newer than Unity 2019.4.
+
+# Changelog
+
+## [1.0.11-unity2019.4.0] - Unity 2019.4 compatibility backport
+
+- Backported the 1.0.11 runtime/editor source from C# 8/9 constructs to C# 7.3-compatible syntax used by Unity 2019.4.
+- Replaced `record`/`with`, switch expressions, relational patterns, ranges, `??=`, target-typed `new`, and `System.HashCode.Combine`.
+- Removed the optional JetBrains annotation dependency from runtime compilation.
+- Replaced the 2021.1+ `RadioButtonGroup` configuration popup with an IMGUI popup.
+- Disabled the 2021.2+ Scene Overlay implementation on Unity 2019.4 while preserving it for newer Unity versions.
+- Updated package metadata to target Unity 2019.4.
+
 ## [1.0.11](https://github.com/Preliy/Flange/compare/v1.0.10...v1.0.11) (2025-09-27)
 
 

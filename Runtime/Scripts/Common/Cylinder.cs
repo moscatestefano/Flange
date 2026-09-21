@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -36,13 +36,13 @@ namespace Preliy.Flange.Common
         [Space(10)]
         [Header("Status")]
         [SerializeField]
-        private Property<float> _progress = new (0f);
+        private Property<float> _progress = new Property<float>(0f);
         [SerializeField]
-        private Property<float> _value = new (0f);
+        private Property<float> _value = new Property<float>(0f);
         [SerializeField]
-        private Property<bool> _limitMin = new (false);
+        private Property<bool> _limitMin = new Property<bool>(false);
         [SerializeField]
-        private Property<bool> _limitMax = new (false);
+        private Property<bool> _limitMax = new Property<bool>(false);
 
         [Header("Settings")]
         [SerializeField]

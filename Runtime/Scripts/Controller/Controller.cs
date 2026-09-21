@@ -23,16 +23,16 @@ namespace Preliy.Flange
         public float SampleTime => 0.02f;
 
         [SerializeField]
-        private Property<int> _tool = new (0);
+        private Property<int> _tool = new Property<int>(0);
         [SerializeField]
-        private Property<int> _frame = new (0);
+        private Property<int> _frame = new Property<int>(0);
         [SerializeField]
-        private Property<Configuration> _configuration = new (Flange.Configuration.Default);
+        private Property<Configuration> _configuration = new Property<Configuration>(Flange.Configuration.Default);
 
         [SerializeField]
-        private List<Tool> _tools = new ();
+        private List<Tool> _tools = new List<Tool>();
         [SerializeField]
-        private List<ReferenceFrame> _frames = new ();
+        private List<ReferenceFrame> _frames = new List<ReferenceFrame>();
         [SerializeField]
         private MechanicalGroup _mechanicalGroup;
 
@@ -42,7 +42,7 @@ namespace Preliy.Flange
         
         [HideInInspector]
         [SerializeField]
-        private Property<bool> _isValid = new ();
+        private Property<bool> _isValid = new Property<bool>();
 
         private Solver _solver;
         

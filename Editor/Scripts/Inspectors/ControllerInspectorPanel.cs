@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -20,7 +20,7 @@ namespace Preliy.Flange.Editor
         private readonly VisualElement _emptyContainer;
         private readonly VisualElement _controlContainer;
         private readonly VisualElement _jointContainer;
-        private readonly List<JointSlider> _jointSliders = new();
+        private readonly List<JointSlider> _jointSliders = new List<JointSlider>();
         private readonly IntegerField _toolField;
         private readonly IntegerField _frameField;
         private readonly Vector3Field _positionField;
@@ -233,7 +233,8 @@ namespace Preliy.Flange.Editor
             {
                 if (_controller.MechanicalGroup.Robot == null) return;
                 _controller.MechanicalGroup.Robot.transform.parent = baseUnit.Frames.Last().Transform;
-                _controller.MechanicalGroup.Robot.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+                _controller.MechanicalGroup.Robot.transform.localPosition = Vector3.zero;
+                _controller.MechanicalGroup.Robot.transform.localRotation = Quaternion.identity;
             }
             
             _controller.MechanicalGroup.OnValidate();

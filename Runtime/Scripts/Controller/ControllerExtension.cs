@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using UnityEngine;
 
@@ -24,10 +24,13 @@ namespace Preliy.Flange
 
         public static int GetValidToolIndex(this Controller controller, int index)
         {
+            if (index < 0)
+            {
+                return Mathf.Max(0, controller.Tool.Value);
+            }
+
             switch (index)
             {
-                case < 0:
-                    return Mathf.Max(0, controller.Tool.Value);
                 case 0:
                     return 0;
                 default:
@@ -85,21 +88,25 @@ namespace Preliy.Flange
 
         public static CartesianTarget ConvertFrame(this Controller controller, CartesianTarget target, int from = (int)CoordinateSystem.Base, int to = (int)CoordinateSystem.Base)
         {
-            return target with {Pose = controller.ConvertFrame(target.Pose, from, to, target.ExtJoint)};
+            var result = target.Clone();
+            result.Pose = controller.ConvertFrame(target.Pose, from, to, target.ExtJoint);
+            return result;
         }
         
         public static IReferenceFrame GetFrameActual(this Controller controller) => GetFrame(controller, controller.Frame.Value);
         
         public static IReferenceFrame GetFrame(this Controller controller, int index)
         {
-            switch (index)
+            if (index < 0)
             {
-                case < 0:
-                    return new ReferenceFrameWorld();
-                case 0:
-                    return controller.MechanicalGroup;
-                case > 0:
-                    try
+                return new ReferenceFrameWorld();
+            }
+            if (index == 0)
+            {
+                return controller.MechanicalGroup;
+            }
+
+            try
                     {
                         if (controller.Frames.ElementAt(index-1) == null)
                         {
@@ -107,24 +114,25 @@ namespace Preliy.Flange
                         }
                         return controller.Frames[index-1];
                     }
-                    catch (Exception exception)
-                    {
-                        Logger.Log(LogType.Error, exception.Message, controller);
-                        return new ReferenceFrameWorld();
-                    }
+            catch (Exception exception)
+            {
+                Logger.Log(LogType.Error, exception.Message, controller);
+                return new ReferenceFrameWorld();
             }
         }
         
         public static Transform GetFrameTransform(this Controller controller, int index)
         {
-            switch (index)
+            if (index < 0)
             {
-                case < 0:
-                    return null;
-                case 0:
-                    return controller.MechanicalGroup.Robot == null ? null : controller.MechanicalGroup.Robot.transform;
-                case > 0:
-                    try
+                return null;
+            }
+            if (index == 0)
+            {
+                return controller.MechanicalGroup.Robot == null ? null : controller.MechanicalGroup.Robot.transform;
+            }
+
+            try
                     {
                         if (controller.Frames.ElementAt(index) == null)
                         {
@@ -132,11 +140,10 @@ namespace Preliy.Flange
                         }
                         return controller.Frames[index].transform;
                     }
-                    catch (Exception exception)
-                    {
-                        Logger.Log(LogType.Error, exception.Message, controller);
-                        return null;
-                    }
+            catch (Exception exception)
+            {
+                Logger.Log(LogType.Error, exception.Message, controller);
+                return null;
             }
         }
     }

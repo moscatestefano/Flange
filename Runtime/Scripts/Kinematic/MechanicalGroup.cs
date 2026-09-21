@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using JetBrains.Annotations;
 using UnityEngine;
 
 namespace Preliy.Flange
@@ -10,7 +9,6 @@ namespace Preliy.Flange
     public class MechanicalGroup : IReferenceFrame
     {
         public bool IsValid => _isValid;
-        [CanBeNull] 
         public Robot Robot => _robot;
         public MechanicalUnit BaseMechanicalUnit => _baseMechanicalUnit;
         public List<MechanicalUnit> ExternalMechanicalUnits => _externalMechanicalUnits;
@@ -24,23 +22,23 @@ namespace Preliy.Flange
         [SerializeField]
         private MechanicalUnit _baseMechanicalUnit;
         [SerializeField]
-        private List<MechanicalUnit> _externalMechanicalUnits = new ();
+        private List<MechanicalUnit> _externalMechanicalUnits = new List<MechanicalUnit>();
 
         [HideInInspector]
         [SerializeField]
         private bool _isValid;
         [HideInInspector]
         [SerializeField]
-        private List<MechanicalUnit> _mechanicalUnits = new ();
+        private List<MechanicalUnit> _mechanicalUnits = new List<MechanicalUnit>();
         [HideInInspector]
         [SerializeField]
-        private List<TransformJoint> _joints = new ();
+        private List<TransformJoint> _joints = new List<TransformJoint>();
         [HideInInspector]
         [SerializeField]
-        private List<TransformJoint> _robotJoints = new ();
+        private List<TransformJoint> _robotJoints = new List<TransformJoint>();
         [HideInInspector]
         [SerializeField]
-        private List<TransformJoint> _externalJoints = new ();
+        private List<TransformJoint> _externalJoints = new List<TransformJoint>();
 
         [HideInInspector]
         [SerializeField]
@@ -82,17 +80,17 @@ namespace Preliy.Flange
             
                 _mechanicalUnits.Add(_robot);
             
-                if (_baseMechanicalUnit is not null)
+                if (_baseMechanicalUnit != null)
                 {
                     if (!_mechanicalUnits.Contains(_baseMechanicalUnit)) {_mechanicalUnits.Add(_baseMechanicalUnit);}
                 }
 
-                foreach (var slave in _externalMechanicalUnits.Where(slave => slave is not null))
+                foreach (var slave in _externalMechanicalUnits.Where(slave => slave != null))
                 {
                     _mechanicalUnits.Add(slave);
                 }
 
-                foreach (var joint in from mechanicalUnit in _mechanicalUnits from joint in mechanicalUnit.Joints where joint is not null select joint)
+                foreach (var joint in from mechanicalUnit in _mechanicalUnits from joint in mechanicalUnit.Joints where joint != null select joint)
                 {
                     _joints.Add(joint);
                 }
@@ -126,29 +124,36 @@ namespace Preliy.Flange
         {
             try
             {
-                switch (index)
+                var robotJointCount = _robot != null ? _robot.Joints.Count : 0;
+                var externalStart = robotJointCount;
+                var externalEnd = externalStart + _externalJoints.Count;
+
+                if (index >= 0 && index < robotJointCount)
                 {
-                    case >= 0 and < 6:
+                    _jointState[index] = value;
+                }
+                else if (index >= externalStart && index < externalEnd)
+                {
+                    var jointTarget = _jointState.Clone();
+                    jointTarget[index] = value;
+                    var refFrameTarget = _controller.GetTcpRelativeToRefFrame();
+                    var target = _controller.FrameToWorld(refFrameTarget, _controller.Frame.Value, jointTarget.ExtJoint);
+                    var solution = _controller.Solver.ComputeInverse(target, _controller.Tool.Value, _controller.Configuration.Value, jointTarget.ExtJoint);
+                    if (!solution.IsValid)
+                    {
                         _jointState[index] = value;
-                        break;
-                    case >= 6 and < 12:
-                        var jointTarget = _jointState with {};
-                        jointTarget[index] = value;
-                        var refFrameTarget = _controller.GetTcpRelativeToRefFrame();
-                        var target = _controller.FrameToWorld(refFrameTarget, _controller.Frame.Value, jointTarget.ExtJoint);
-                        var solution = _controller.Solver.ComputeInverse(target, _controller.Tool.Value, _controller.Configuration.Value, jointTarget.ExtJoint);
-                        if (!solution.IsValid)
-                        {
-                            _jointState[index] = value;
-                            SetJoints(_jointState, notify);
-                            throw solution.Exception;
-                        }
-                        _jointState = solution.JointTarget with {};
-                        break;
-                    case >= 12 and < 15:
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                        SetJoints(_jointState, notify);
+                        throw solution.Exception;
+                    }
+                    _jointState = solution.JointTarget.Clone();
+                }
+                else if (index >= externalEnd && index < externalEnd + 3)
+                {
+                    // Reserved joint indices.
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException();
                 }
 
                 SetJoints(_jointState, notify);
@@ -167,7 +172,7 @@ namespace Preliy.Flange
         public void SetJoints(JointTarget jointTarget, bool notify = false)
         {
             if (!_isValid) return;
-            _jointState = jointTarget with {};
+            _jointState = jointTarget.Clone();
             SetRobotJoints(_jointState);
             SetExternalJoints(_jointState);
             if (notify) OnJointStateChanged?.Invoke();
@@ -248,12 +253,13 @@ namespace Preliy.Flange
         private void SetExternalJoints(JointTarget jointTarget)
         {
             var index = 0;
+            var robotJointCount = _robot != null ? _robot.Joints.Count : 0;
 
             if (_baseMechanicalUnit != null)
             {
                 for (var i = 0; i < _baseMechanicalUnit.Joints.Count; i++)
                 {
-                    _baseMechanicalUnit[i] = jointTarget[6 + index];
+                    _baseMechanicalUnit[i] = jointTarget[robotJointCount + index];
                     index++;
                 }
             }
@@ -262,7 +268,7 @@ namespace Preliy.Flange
             {
                 for (var i = 0; i < externalMechanical.Joints.Count; i++)
                 {
-                    externalMechanical[i] = jointTarget[6 + index];
+                    externalMechanical[i] = jointTarget[robotJointCount + index];
                     index++;
                 }
             }
@@ -297,7 +303,8 @@ namespace Preliy.Flange
             {
                 if (_baseMechanicalUnit == mechanicalUnit)
                 {
-                    result = extJoint.Value[offset..mechanicalUnit.Joints.Count];
+                    result = new float[mechanicalUnit.Joints.Count];
+                    Array.Copy(extJoint.Value, offset, result, 0, mechanicalUnit.Joints.Count);
                     return result;
                 }
                 offset += _baseMechanicalUnit.Joints.Count;
@@ -307,7 +314,8 @@ namespace Preliy.Flange
             {
                 if (unit == mechanicalUnit)
                 {
-                    result = extJoint.Value[offset..mechanicalUnit.Joints.Count];
+                    result = new float[mechanicalUnit.Joints.Count];
+                    Array.Copy(extJoint.Value, offset, result, 0, mechanicalUnit.Joints.Count);
                     return result;
                 }
                 offset += unit.Joints.Count;
@@ -324,12 +332,15 @@ namespace Preliy.Flange
         /// </returns>
         public Matrix4x4 GetRobotBaseWorld(CoordinateSystem frame = CoordinateSystem.Base)
         {
-            return frame switch
+            switch (frame)
             {
-                CoordinateSystem.World => _robot.WorldTransform,
-                CoordinateSystem.Base => Matrix4x4.identity,
-                _ => throw new ArgumentOutOfRangeException(nameof(frame), frame, null)
-            };
+                case CoordinateSystem.World:
+                    return _robot.WorldTransform;
+                case CoordinateSystem.Base:
+                    return Matrix4x4.identity;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(frame), frame, null);
+            }
         }
 
         /// <summary>
@@ -381,7 +392,7 @@ namespace Preliy.Flange
         /// </summary>
         public void SaveState()
         {
-            _initJointState = _jointState with {};
+            _initJointState = _jointState.Clone();
 #if UNITY_EDITOR
             if (!Application.isPlaying) UnityEditor.EditorUtility.SetDirty(_controller);
 #endif

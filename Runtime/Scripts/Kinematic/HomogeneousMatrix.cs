@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace Preliy.Flange
@@ -13,12 +13,15 @@ namespace Preliy.Flange
         /// <param name="value">Joint value [deg] or [m]</param>
         public static Matrix4x4 Create(FrameConfig config, JointConfig joint, float value)
         {
-            return joint.Type switch
+            switch (joint.Type)
             {
-                TransformJoint.JointType.Rotation => CreateRaw(config, angle: joint.GetValidValue(value) * Mathf.Deg2Rad),
-                TransformJoint.JointType.Displacement => CreateRaw(config, displacement: joint.GetValidValue(value)),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                case TransformJoint.JointType.Rotation:
+                    return CreateRaw(config, angle: joint.GetValidValue(value) * Mathf.Deg2Rad);
+                case TransformJoint.JointType.Displacement:
+                    return CreateRaw(config, displacement: joint.GetValidValue(value));
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
         /// <summary>

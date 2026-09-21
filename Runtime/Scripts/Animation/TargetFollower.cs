@@ -34,7 +34,7 @@ namespace Preliy.Flange
 
         [HideInInspector]
         [SerializeField]
-        private Property<Matrix4x4> _target = new ();
+        private Property<Matrix4x4> _target = new Property<Matrix4x4>();
 
         private void OnEnable()
         {

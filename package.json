@@ -1,18 +1,18 @@
 {
   "name": "com.preliy.flange",
   "displayName": "Flange",
-  "version": "1.0.11",
-  "unity": "2022.3",
-  "unityRelease": "5f1",
-  "description": "Virtual robot controller",
+  "version": "1.0.11-unity2019.4.0",
+  "unity": "2019.4",
+  "description": "Virtual robot controller (Unity 2019.4/2022.3 compatible backport of Flange 1.0.11)",
   "author": {
-    "name": "Preliy",
+    "name": "Preliy (rev. Stefano Moscatelli)",
     "email": "preliyex@gmail.com"
   },
+  "contributors": ["Stefano Moscatelli"],
   "keywords": [
     "Industrial",
     "Robot",
-    "Kinamatic"
+    "Kinematic"
   ],
   "samples": [
     {

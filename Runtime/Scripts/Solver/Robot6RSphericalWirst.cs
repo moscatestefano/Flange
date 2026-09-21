@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,7 +15,7 @@ namespace Preliy.Flange
         private const int JOINT_COUNT = 6;
         private const int DEFAULT_SOLUTIONS_COUNT = 8;
 
-        private readonly static List<int> InverseIndex = new() {2, 3, 6, 7};
+        private readonly static List<int> InverseIndex = new List<int> {2, 3, 6, 7};
         private readonly static Matrix4x4 T6G = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0, -90, 0), Vector3.one);
        
         private Vector4 _p65;

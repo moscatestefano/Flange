@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 namespace Preliy.Flange.Common
@@ -34,11 +34,11 @@ namespace Preliy.Flange.Common
         
         [Header("Control")]
         [SerializeField]
-        private Property<float> _target = new (0f);
+        private Property<float> _target = new Property<float>(0f);
         
         [Header("State")]
         [SerializeField]
-        private Property<float> _value = new (0f);
+        private Property<float> _value = new Property<float>(0f);
         
         [Header("Settings")]
         [SerializeField]

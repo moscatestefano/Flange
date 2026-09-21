@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,7 +32,7 @@ namespace Preliy.Flange
 
         private bool CheckValue(T value)
         {
-            _comparer ??= EqualityComparer<T>.Default;
+            if (_comparer == null) _comparer = EqualityComparer<T>.Default;
             if (_comparer.Equals(_value, value)) return false;
 
             SetValue(value);
@@ -41,7 +41,7 @@ namespace Preliy.Flange
         
         public void OnValidate()
         {
-            _comparer ??= EqualityComparer<T>.Default;
+            if (_comparer == null) _comparer = EqualityComparer<T>.Default;
             if (_comparer.Equals(_value, _lastValue)) return;
             SetValue(_value);
         }

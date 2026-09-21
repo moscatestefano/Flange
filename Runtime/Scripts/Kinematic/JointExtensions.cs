@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -80,7 +80,7 @@ namespace Preliy.Flange
         
         public static float[] GetJointValues(this IReadOnlyList<TransformJoint> joints, float[] value = null)
         {
-            value ??= new float[joints.Count];
+            if (value == null) value = new float[joints.Count];
 
             if (joints.Count != value.Length)
             {

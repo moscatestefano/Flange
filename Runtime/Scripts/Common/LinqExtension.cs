@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Preliy.Flange
@@ -7,13 +7,13 @@ namespace Preliy.Flange
     {
         public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IComparer<TKey> comparer = null)
         {
-            comparer ??= Comparer<TKey>.Default;
+            if (comparer == null) comparer = Comparer<TKey>.Default;
             return source.ArgBy(keySelector, lag => comparer.Compare(lag.Current, lag.Previous) < 0);
         }
 
         public static TSource MaxBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IComparer<TKey> comparer = null)
         {
-            comparer ??= Comparer<TKey>.Default;
+            if (comparer == null) comparer = Comparer<TKey>.Default;
             return source.ArgBy(keySelector, lag => comparer.Compare(lag.Current, lag.Previous) > 0);
         }
         
