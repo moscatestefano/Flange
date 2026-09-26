@@ -168,7 +168,7 @@ namespace Preliy.Flange
             var bestScore = float.MaxValue;
             var hadCandidate = false;
 
-            EnumerateAnalyticSolutions(target, delegate(float[] q, int branchIndex)
+            EnumerateAnalyticSolutions(target, current[0], delegate(float[] q, int branchIndex)
             {
                 hadCandidate = true;
                 var branchConfiguration = configuration;
@@ -199,7 +199,11 @@ namespace Preliy.Flange
         {
             var solutions = new List<IKSolution>();
 
-            EnumerateAnalyticSolutions(target, delegate(float[] q, int branchIndex)
+            var current = _joints != null && _joints.Count == JOINT_COUNT
+                ? _joints.GetJointValues()
+                : new float[JOINT_COUNT];
+
+            EnumerateAnalyticSolutions(target, current[0], delegate(float[] q, int branchIndex)
             {
                 var configuration = new Configuration(0, 0, 0, branchIndex);
                 var solution = CreateSolution(q, configuration, ignoreMask);
@@ -266,7 +270,10 @@ namespace Preliy.Flange
             return solution;
         }
 
-        private void EnumerateAnalyticSolutions(Matrix4x4 target, Action<float[], int> emit)
+        private void EnumerateAnalyticSolutions(
+            Matrix4x4 target,
+            float preferredQ1,
+            Action<float[], int> emit)
         {
             if (emit == null)
                 return;
@@ -315,8 +322,8 @@ namespace Preliy.Flange
             if (q4Abs <= 0.0001f)
                 return;
 
-            EmitQ4Branch(target, X, H, Z, -q4Abs, step, emit, 0);
-            EmitQ4Branch(target, X, H, Z, q4Abs, step, emit, 1);
+            EmitQ4Branch(target, X, H, Z, -q4Abs, step, preferredQ1, emit, 0);
+            EmitQ4Branch(target, X, H, Z, q4Abs, step, preferredQ1, emit, 1);
         }
 
         private void EmitQ4Branch(
@@ -326,12 +333,41 @@ namespace Preliy.Flange
             float Z,
             float q4,
             float step,
+            float preferredQ1,
             Action<float[], int> emit,
             int q4Branch)
         {
             var q4Rad = q4 * Deg2Rad;
             var c4 = Cos(q4Rad);
             var s4 = Sin(q4Rad);
+
+            // On the robot's vertical centerline at maximum extension, the
+            // position equations lose q1: A = B = 0 and X = Z = 0. Recover
+            // that free joint from the current posture, then let the wrist
+            // decomposition compensate the resulting orientation.
+            var centerlineRadius = Sqrt(2f + 2f * c4);
+            if (Abs(X) <= ReductionTolerance &&
+                Abs(Z) <= ReductionTolerance &&
+                Abs(H - centerlineRadius) <= ReductionTolerance)
+            {
+                var q2Singular = q4 * 0.5f;
+                var q1Singular = Clamp(
+                    WrapDeg(preferredQ1),
+                    JointLimits[0].x,
+                    JointLimits[0].y);
+                TryEmitFullPose(
+                    target,
+                    q1Singular,
+                    q2Singular,
+                    0f,
+                    q4,
+                    q4Branch * 4,
+                    emit);
+
+                // At equality the positional constraint has a single q2/q3
+                // solution; the uniform q2 grid cannot add another branch.
+                return;
+            }
 
             if (Abs(s4) < AnalyticEpsilon)
                 return;
