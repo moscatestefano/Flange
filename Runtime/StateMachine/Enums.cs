@@ -15,6 +15,8 @@ namespace Preliy.Flange.Orchestration
         YELLOW,
         GREEN,
         RED,
-        PURPLE
+        PURPLE,
+        WHITE,
+        BLUE
     }
 }
