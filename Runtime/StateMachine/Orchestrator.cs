@@ -30,6 +30,7 @@ namespace Preliy.Flange.Orchestration
 
         public OrchestratorStatus Status { get; private set; } = OrchestratorStatus.Idle;
         public IRobotState CurrentState { get; private set; }
+        public Controller Controller { get { return _controller; } }
         public int PendingCount { get { return _queue.Count; } }
 
         public event Action<IRobotState> OnStateStarted;
@@ -58,26 +59,42 @@ namespace Preliy.Flange.Orchestration
             _repository = _repositoryComponent as IManipulationRepository;
         }
 
-        public void SubmitTask(ManipulationTaskRequest request)
+        /// <summary>Submit a prebuilt sequence of generic robot states.</summary>
+        public void SubmitTask(IEnumerable<IRobotState> states)
         {
+            if (states == null) throw new ArgumentNullException(nameof(states));
             if (Status != OrchestratorStatus.Idle && Status != OrchestratorStatus.Completed)
             {
-                Logger.Log(
-                    LogType.Warning,
-                    "Task submission rejected because the orchestrator is " + Status + ".",
-                    this);
-                return;
-            }
-
-            if (_repository == null)
-            {
-                Fault(null, "Orchestrator repository is missing or does not implement IManipulationRepository.");
+                Logger.Log(LogType.Warning,
+                    "Task submission rejected because the orchestrator is " + Status + ".", this);
                 return;
             }
 
             try
             {
-                EnqueueRange(TaskBuilder.Build(_controller, request, _repository));
+                EnqueueRange(states);
+                Run();
+            }
+            catch (Exception exception)
+            {
+                Fault(null, exception.Message);
+            }
+        }
+
+        /// <summary>Build and submit a sequence while keeping builder errors inside orchestration handling.</summary>
+        public void SubmitTask(Func<IEnumerable<IRobotState>> buildStates)
+        {
+            if (buildStates == null) throw new ArgumentNullException(nameof(buildStates));
+            if (Status != OrchestratorStatus.Idle && Status != OrchestratorStatus.Completed)
+            {
+                Logger.Log(LogType.Warning,
+                    "Task submission rejected because the orchestrator is " + Status + ".", this);
+                return;
+            }
+
+            try
+            {
+                EnqueueRange(buildStates());
                 Run();
             }
             catch (Exception exception)
